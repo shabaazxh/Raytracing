@@ -4,6 +4,8 @@
 
 #include "Homogeneous4.h"
 #include "Material.h"
+#include "ray.h"
+
 class Triangle
 {
 public:
@@ -15,6 +17,8 @@ public:
     Cartesian3 uvs[3];
 
     Material* shared_material;
+
+    float intersect(Ray& r);
 
 
 };

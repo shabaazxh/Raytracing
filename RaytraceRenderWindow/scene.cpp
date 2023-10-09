@@ -11,20 +11,9 @@ Scene::~Scene()
 
 bool CheckIntersection(Triangle& triangle, Ray& ray)
 {
-    // Calculate normal for the plane the triangle sits on
-    auto p0 = Cartesian3(triangle.verts[0].x, triangle.verts[0].y, triangle.verts[0].z);
-    auto p1 = Cartesian3(triangle.verts[1].x, triangle.verts[1].y, triangle.verts[1].z);;
-    auto p2 = Cartesian3(triangle.verts[2].x, triangle.verts[2].y, triangle.verts[2].z);;
+    auto t = triangle.intersect(ray);
 
-    auto a = (p1 - p0);
-    auto b = (p2 - p0);
-
-    auto n = a.cross(b);
-    n = n.unit();
-
-
-
-    return false;
+    return t > 0;
 }
 
 Scene::CollisionInfo Scene::ClosestTriangle(Ray& r)
