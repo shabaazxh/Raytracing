@@ -24,14 +24,33 @@ float Triangle::intersect(Ray& r)
     // check if the ray is paralell to the normal to prevent division by 0 later
     if(dir.dot(n) == 0)
     {
-        return false;
+        return -1;
     }
     double t = ((p0 - pos).dot(n)) / (dir.dot(n));
 
-    //auto intersectionPoint = pos + dir * multiplier;
+    // calculate intersection point
+    auto intersectionPoint = pos + dir * t;
 
-    // from p0 to intersection point
-    //auto f = p0 - intersectionPoint;
+    // vectors from p0 to p1/p2/intersectionPoint
+    auto v0 = p1 - p0;
+    auto v1 = p2 - p0;
+    auto v2 = intersectionPoint - p0;
 
-    return t;
+    // calculate dot products
+    double dot00 = v0.dot(v0);
+    double dot01 = v0.dot(v1);
+    double dot02 = v0.dot(v2);
+    double dot11 = v1.dot(v1);
+    double dot12 = v1.dot(v2);
+
+    // calculate barycentric coordinates
+    double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // check if point is in triangle
+    if ((u >= 0) && (v >= 0) && (u + v < 1))
+        return t;
+
+    return -1;
 }
