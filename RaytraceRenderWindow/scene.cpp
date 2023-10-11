@@ -1,5 +1,5 @@
 #include "scene.h"
-
+#include <limits>
 Scene::Scene()
 {
 }
@@ -9,21 +9,24 @@ Scene::~Scene()
     delete default_mat;
 }
 
-bool CheckIntersection(Triangle& triangle, Ray& ray)
+float CheckIntersection(Triangle& triangle, Ray& ray)
 {
-    auto t = triangle.intersect(ray);
-
-    return t > 0;
+    return triangle.intersect(ray);
 }
 
 Scene::CollisionInfo Scene::ClosestTriangle(Ray& r)
 {
     Scene::CollisionInfo ci;
-    ci.t = r.GetRayOrigin().x;
+    ci.t = std::numeric_limits<float>::max();
 
     for(unsigned int i = 0; i < triangles.size(); i++)
     {
         auto intersect = CheckIntersection(triangles[i], r);
+        if(ci.t > intersect && intersect >= 0)
+        {
+            ci.t = intersect;
+            ci.tri = triangles[i];
+        }
     }
     return ci;
 }
@@ -33,14 +36,16 @@ Matrix4 Scene::GetModelView()
     Matrix4 modelViewMatrix;
     modelViewMatrix.SetIdentity();
 
-    auto pos = Cartesian3(0.0, 0.0, 1.0);
-    auto dir = Cartesian3(0.0f, 0.0f, -10.0f);
+    auto pos = ray->GetRayOrigin();
+    auto dir = ray->GetRayDirecion();
     auto up = Cartesian3(0.0f, 1.0f, 0.0);
 
     auto right = dir.cross(up);
     auto rightNormalized = right.unit();
+
     dir = dir.unit();
-    up = up.unit();
+    // recalculate true up direction
+    up = right.cross(dir);
 
     // Set the rotation part of the matrix
     modelViewMatrix[0][0] = rightNormalized.x;
@@ -58,14 +63,15 @@ Matrix4 Scene::GetModelView()
     // Set the translation part of the matrix
     modelViewMatrix[3][0] = -pos.x;
     modelViewMatrix[3][1] = -pos.y;
-    modelViewMatrix[3][2] = pos.z;
+    modelViewMatrix[3][2] = -pos.z;
 
     return modelViewMatrix;
 
 }
 
-Scene::Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp)
+Scene::Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp, Ray* ray)
 {
+    this->ray = ray;
     objects = texobjs;
     rp = renderrp;
     Cartesian3 ambient = Cartesian3(0.5f, 0.5f, 0.5f);
@@ -78,6 +84,13 @@ Scene::Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp)
 
 void Scene::updateScene()
 {
+    for(unsigned int i = 0; i < rp->lights.size(); i++)
+    {
+        auto currentPos = rp->lights[i]->GetPositionCenter();
+        auto modelView = GetModelView();
+        auto newpos = modelView * currentPos;
+        rp->lights[i]->SetPosition( newpos );
+    }
     triangles.clear();
     for(int i = 0; i < int(objects->size()); i++)
     {
@@ -117,7 +130,7 @@ void Scene::updateScene()
 
                 }
 
-                if(obj.material = nullptr)
+                if(obj.material == nullptr)
                 {
                     t.shared_material = default_mat;
                 } else {

@@ -20,6 +20,9 @@ public:
 
     float intersect(Ray& r);
 
+    Cartesian3 baricentric(Cartesian3 intersection_point);
+    Homogeneous4 PhongShading(const Homogeneous4& lightpos, const Homogeneous4& lightcolour, const Ray& ray, const Homogeneous4& barycentricCoords, bool inShadow);
+
 
 };
 

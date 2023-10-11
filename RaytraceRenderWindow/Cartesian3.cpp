@@ -49,6 +49,12 @@ Cartesian3 Cartesian3::operator *(float factor) const
     return returnVal;
     } // Cartesian3::operator *()
 
+// my own overload of the * operator ======================
+Cartesian3 Cartesian3::operator*(const Cartesian3& other) const
+{
+    return {x * other.x, y * other.y, z * other.z};
+}
+
 // division operator
 Cartesian3 Cartesian3::operator /(float factor) const
     { // Cartesian3::operator /()
@@ -69,6 +75,18 @@ Cartesian3 Cartesian3::cross(const Cartesian3 &other) const
     Cartesian3 returnVal(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
     return returnVal;
     } // Cartesian3::cross()
+
+// Return reflected vector about the normal
+// Ensure normal is normalized
+Cartesian3 Cartesian3::reflect(const Cartesian3& normal) const
+{
+    // formula is: r = d - 2(d * n)n; https://math.stackexchange.com/a/13263
+    Cartesian3 direction = {x, y, z};
+
+    auto r = direction - 2 * (direction.dot(normal) * normal);
+
+    return r;
+}
 
 // routine to find the length
 float Cartesian3::length() const

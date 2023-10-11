@@ -8,6 +8,7 @@ class Ray
 public:
     Ray(Cartesian3 og, Cartesian3 dir);
 
+    void SetDirection(const Cartesian3& dir) { direction = dir; }
 
     Cartesian3 GetRayOrigin() const { return origin;}
     Cartesian3 GetRayDirecion() const { return direction; }

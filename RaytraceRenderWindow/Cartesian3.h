@@ -43,6 +43,8 @@ class Cartesian3
     // multiplication operator
     Cartesian3 operator *(float factor) const;
 
+    Cartesian3 operator*(const Cartesian3& other) const;
+
     // division operator
     Cartesian3 operator /(float factor) const;
 
@@ -51,12 +53,17 @@ class Cartesian3
 
     // cross product routine
     Cartesian3 cross(const Cartesian3 &other) const;
+
+    // reflect vector
+    Cartesian3 reflect(const Cartesian3& normal) const;
     
     // routine to find the length
     float length() const;
     
     // normalisation routine
     Cartesian3 unit() const;
+
+
     
     // operator that allows us to use array indexing instead of variable names
     float &operator [] (const int index);

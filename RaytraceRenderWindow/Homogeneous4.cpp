@@ -91,6 +91,12 @@ Homogeneous4 Homogeneous4::operator /(float factor) const
     return returnVal;
     } // Homogeneous4::operator /()
 
+// Operator overloded +=
+Homogeneous4 Homogeneous4::operator+=(const Homogeneous4& other) const
+{
+    return { x + other.x, y + other.y, z + other.z, w + other.w };
+}
+
 // operator that allows us to use array indexing instead of variable names
 float &Homogeneous4::operator [] (const int index)
     { // operator []

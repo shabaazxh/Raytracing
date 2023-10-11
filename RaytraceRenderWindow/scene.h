@@ -24,11 +24,12 @@ public:
     Scene();
     ~Scene();
 
+    Ray* ray;
     std::vector<ThreeDModel>* objects;
     RenderParameters* rp;
     std::vector<Triangle> triangles;
     Material* default_mat;
-    Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp);
+    Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp, Ray* ray);
     void updateScene();
     Matrix4 GetModelView();
 

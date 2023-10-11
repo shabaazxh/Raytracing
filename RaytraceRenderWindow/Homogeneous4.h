@@ -53,6 +53,8 @@ class Homogeneous4
     // division operator
     Homogeneous4 operator /(float factor) const;
 
+    Homogeneous4 operator +=(const Homogeneous4& other) const;
+
     // operator that allows us to use array indexing instead of variable names
     float &operator [] (const int index);
     const float &operator [] (const int index) const;
