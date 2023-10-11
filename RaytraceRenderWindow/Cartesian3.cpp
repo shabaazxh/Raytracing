@@ -35,6 +35,11 @@ Cartesian3 Cartesian3::operator +(const Cartesian3 &other) const
     return returnVal;
     } // Cartesian3::operator +()
 
+    Cartesian3 Cartesian3::operator+(float factor) const
+    {
+    return {x + factor, y + factor, z + factor};
+    }
+
 // subtraction operator
 Cartesian3 Cartesian3::operator -(const Cartesian3 &other) const
     { // Cartesian3::operator -()

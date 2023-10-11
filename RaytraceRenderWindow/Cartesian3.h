@@ -37,6 +37,8 @@ class Cartesian3
     // addition operator
     Cartesian3 operator +(const Cartesian3 &other) const;
 
+    Cartesian3 operator+(float factor) const;
+
     // subtraction operator
     Cartesian3 operator -(const Cartesian3 &other) const;
     

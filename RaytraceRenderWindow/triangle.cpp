@@ -52,7 +52,7 @@ Cartesian3 Triangle::baricentric(Cartesian3 intersection_point)
     // interp normal
     Cartesian3 interpNormal = alpha * normalA + beta * normalB + gamma * normalC;
 
-    interpNormal.unit();
+    interpNormal = interpNormal.unit();
 
 //    // distance from A to CB
 //    auto cb_edge =  B - C;
@@ -200,7 +200,7 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     //lightDir = {-lightDir.x, -lightDir.y, -lightDir.z};
 
     // Ambient lighting
-    Cartesian3 ambient = 0.1f * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
+    Cartesian3 ambient = 0.2f * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
 
     // Diffuse lightingb
     float diff = std::max(0.0f, normal.dot(lightDir));
@@ -213,18 +213,19 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     viewDirection = viewDirection.unit();
 
     // reflect about the normal
+    //lightDir = Cartesian3(-lightDir.x, -lightDir.y, -lightDir.z);
     Cartesian3 reflectionDirection = lightDir.reflect(normal);
     float spec_calc = std::pow(std::max(viewDirection.dot(reflectionDirection), 0.0f), 32);
     Cartesian3 spec = {spec_calc, spec_calc, spec_calc};
     Cartesian3 specular = specularAmount * spec * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
 
-//    if(inShadow)
-//    {
-//        // means we hit something and we're in shadow
-//        ambient = Cartesian3(0.0f, 0.0f, 0.0f);
-//        diffuse = Cartesian3(0.0f, 0.0f, 0.0f);
-//        specular = Cartesian3(0.0f, 0.0f, 0.0f);
-//    }
+    if(inShadow)
+    {
+        // means we hit something and we're in shadow
+        //ambient = Cartesian3(0.0f, 0.0f, 0.0f);
+        diffuse = Cartesian3(0.0f, 0.0f, 0.0f);
+        specular = Cartesian3(0.0f, 0.0f, 0.0f);
+    }
 
     auto c = (ambient + diffuse + specular) *  Cartesian3(shared_material->diffuse);
 

@@ -222,6 +222,8 @@ void RaytraceRenderWidget::RaytraceThread()
                     Cartesian3 interpNormal = baricentric.x * normalA + baricentric.y * normalB + baricentric.z * normalC;
                     output_normals = interpNormal;
                     interpNormal = interpNormal.unit();
+
+                    interpNormal = 0.5 * interpNormal + 0.5f;
                     color = {interpNormal.x, interpNormal.y, interpNormal.z, 1.0f};
                 } else
                 {
@@ -241,10 +243,10 @@ void RaytraceRenderWidget::RaytraceThread()
                         Ray shadowRay(r + Cartesian3(output_normals.x, output_normals.y, output_normals.z) * bias, lightDirection);
                         bool inShadow = false;
                         auto shadowcollide = scene->ClosestTriangle(shadowRay);
-                        if(shadowcollide.t < shadowRayDistance)
+                        if(shadowcollide.t < shadowRayDistance && shadowcollide.t  > bias)
                             inShadow = true;
                         color = color + collision.tri.PhongShading(renderParameters->lights[i]->GetPositionCenter(),
-                                                                  renderParameters->lights[i]->GetColor(), ray, {c.x, c.y, c.z}, inShadow);
+                                                                  renderParameters->lights[i]->GetColor(), ray, {c.x, c.y, c.z}, false);
                     }
                 }
             } else
