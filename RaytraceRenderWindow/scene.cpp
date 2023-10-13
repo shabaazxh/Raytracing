@@ -65,7 +65,12 @@ Matrix4 Scene::GetModelView()
     modelViewMatrix[3][1] = -pos.y;
     modelViewMatrix[3][2] = -pos.z;
 
-    return modelViewMatrix;
+    // Define the model matrix. This will move the world around
+    Matrix4 modelMatrix;
+    modelMatrix.SetIdentity();
+    modelMatrix.SetTranslation({0.0f, 0.0f, 0.0f});
+
+    return modelViewMatrix * modelMatrix;
 
 }
 
@@ -84,6 +89,7 @@ Scene::Scene(std::vector<ThreeDModel> *texobjs, RenderParameters* renderrp, Ray*
 
 void Scene::updateScene()
 {
+    // Transform lights to view-space
     for(unsigned int i = 0; i < rp->lights.size(); i++)
     {
         auto currentPos = rp->lights[i]->GetPositionCenter();
@@ -91,6 +97,7 @@ void Scene::updateScene()
         auto newpos = modelView * currentPos;
         rp->lights[i]->SetPosition( newpos );
     }
+
     triangles.clear();
     for(int i = 0; i < int(objects->size()); i++)
     {
@@ -111,7 +118,7 @@ void Scene::updateScene()
 
                     Homogeneous4 v = Homogeneous4(obj.vertices[obj.faceVertices[face][faceVertex]].x,
                                                   obj.vertices[obj.faceVertices[face][faceVertex]].y,
-                                                  obj.vertices[obj.faceVertices[face][faceVertex]].z, 0.0f);
+                                                  obj.vertices[obj.faceVertices[face][faceVertex]].z, 1.0f);
 
                     auto modelView = GetModelView();
                     v = modelView * v;

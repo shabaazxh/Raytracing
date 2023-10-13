@@ -6,6 +6,9 @@ Triangle::Triangle()
     shared_material = nullptr;
 }
 
+// Implementation based on learnings from:
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html#:~:text=Barycentric%20coordinates%20are%20also%20known,A%2C%20B%2C%20C).
+// https://www.youtube.com/watch?v=ZVgf_W-X8eM&t=291s
 Cartesian3 Triangle::baricentric(Cartesian3 intersection_point)
 {
 
@@ -27,108 +30,64 @@ Cartesian3 Triangle::baricentric(Cartesian3 intersection_point)
 
     auto normal = AB.cross(BC);
 
-    auto AC = C - A;
-    auto distanceAB = AB.length();
-    auto distanceAC = AC.length();
+    // Calculate line from each vertex point to intersection point
+    // this will divide the triangle into 3 smaller ones
+    auto a_to_point = intersection_point - A;
+    auto b_to_point = intersection_point - B;
+    auto c_to_point = intersection_point - C;
 
-    auto maxDistance = std::max(distanceAB, distanceAC);
+    // magnitude of cross product vector is equal to the area of the paralellogram formed
+    // by the vectors. Divide by half to get area of triangle since triangle is half paralellogram
+    float main_triangle_area = normal.length() / 2.0;
 
-    auto P = intersection_point;
+    // Calculate the area of each sub-triangle
+    float triangle_a_area = (b_to_point.cross(c_to_point)).length() / 2.0;
+    float triangle_b_area = (a_to_point.cross(c_to_point)).length() / 2.0;
+    float triangle_c_area = (a_to_point.cross(b_to_point)).length() / 2.0;
 
+    // barycentric coordinates
+    auto alpha = triangle_a_area / main_triangle_area;
+    auto beta = triangle_b_area / main_triangle_area;
+    auto gamma = triangle_c_area / main_triangle_area;
 
-    auto distanceBC = (P-A).cross(BC).length() / BC.length();
-    auto distanceCA = (P-B).cross(CA).length() / CA.length();
-    auto distance_AB = (P-C).cross(AB).length() / AB.length();
-
-    auto alpha = 1 - distanceBC / maxDistance;
-    auto beta  = 1 - distanceCA / maxDistance;
-    auto gamma = 1 - distance_AB / maxDistance;
-
-    auto sum = alpha + beta + gamma;
-    alpha /= sum;
-    beta  /= sum;
-    gamma /= sum;
-
-    // interp normal
-    Cartesian3 interpNormal = alpha * normalA + beta * normalB + gamma * normalC;
-
-    interpNormal = interpNormal.unit();
-
-//    // distance from A to CB
-//    auto cb_edge =  B - C;
-//    auto ca_edge =  A - C;
-
-//    auto normal = cb_edge.cross(ca_edge);
-//    auto c = normal.dot(B);
-
-//    auto numerator = normal.dot(A);
-//    auto mag_squared = normal.dot(normal);
-//    auto magnitude = std::sqrt(mag_squared);
-//    auto distance = (numerator - c) / magnitude;
-
-    // should be returnining alpha, beta, gamma and calc interp normal later
+    // store alpha, beta, gamma
     Cartesian3 bc = {alpha, beta, gamma};
-    //sbc.x = intersection_point.x;
 
     return bc;
 }
 
 float Triangle::intersect(Ray& r)
 {
-    // Calculate normal for the plane the triangle sits on
     auto p0 = Cartesian3(verts[0].x, verts[0].y, verts[0].z);
     auto p1 = Cartesian3(verts[1].x, verts[1].y, verts[1].z);
     auto p2 = Cartesian3(verts[2].x, verts[2].y, verts[2].z);
 
-    auto a = (p1 - p0);
-    auto b = (p2 - p0);
+    // find edges of triangle to find normal of triangle
+    auto edge_1 = p1 - p0;
+    auto edge_2 = p2 - p0;
 
-    auto n = a.cross(b);
+    auto n = edge_1.cross(edge_2);
     n = n.unit();
 
     auto pos = r.GetRayOrigin();
     auto dir = r.GetRayDirecion();
 
-//    // check if the ray is paralell to the normal to prevent division by 0 later
-//    if(dir.dot(n) == 1e-6)
-//    {
-//        return -1;
-//    }
-//    double t = ((p0 - pos).dot(n)) / (dir.dot(n));
-
-//    // calculate intersection point
-//    auto intersectionPoint = pos + dir * t;
-
-
-    /*
-        p0 = left
-        p1 = right
-        p2 = top
-    */
-    // vectors from p0 to p1/p2/intersectionPoint
-    //auto v0 = p1 - p0;
-    //auto v1 = p2 - p0;
-    //auto v2 = intersectionPoint - p0;
-
-    // find edges of triangle to find normal of triangle
     // use any of the points of the triangle as a point in the plane
     // and the normal at that point as the normal of the plane
-    auto edge_1 = p1 - p0;
-    auto edge_2 = p2 - p0;
-   // auto intersect_point = intersectionPoint - p0;
-    auto triangle_normal = edge_1.cross(edge_2);
+
+    auto triangle_normal = n;
 
     // we have a normal and a point to define a plane now
     auto planeNormal = triangle_normal;
     auto point_on_plane = p0;
 
-    // calculate t value for ray whe it hits plane
+    // calculate t value for ray where it hits plane
     // t = n * (p - s) / n * d
 
     auto denom = planeNormal.dot(dir); // denominator is n * d (n is normal, d is ray dir)
     // if dot product is 0, we did not hit the plane
     // use small epsilon value to handle floating point
-    if(denom == 0.0001f)
+    if(denom == 0.0001f) // maybe use 1e-6?
     {
         return -1;
     }
@@ -158,14 +117,16 @@ float Triangle::intersect(Ray& r)
     // check if its inside triangle using dot product
 
     // dot products should return positive value if within tri
+    // because the normal resulting from edge of triangle and vector from point to intersection point cross product
+    // will be aligned with triangle's point normal if the point is within the triangle
     bool p0_test = p0_vector.dot(triangle_normal) > 0.0f;
     bool p1_test = p1_vector.dot(triangle_normal) > 0.0f;
     bool p2_test = p2_vector.dot(triangle_normal) > 0.0f;
 
-
+    // if intersection is within the triangle, all dot products should be greater than 1, therefore all should be true
     auto result = p0_test && p1_test && p2_test;
 
-
+    // if intersection is true, return t value
     return result ? ray_t : -1;
 }
 
@@ -200,20 +161,24 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     //lightDir = {-lightDir.x, -lightDir.y, -lightDir.z};
 
     // Ambient lighting
-    Cartesian3 ambient = 0.2f * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
+    Cartesian3 ambient = 0.8f * Cartesian3(shared_material->diffuse);
+
+//    Cartesian3 testDirection = Cartesian3(-1, -1, -1);
+//    testDirection = testDirection.unit();
+//    testDirection = {-testDirection.x, -testDirection.y, -testDirection.z};
 
     // Diffuse lightingb
-    float diff = std::max(0.0f, normal.dot(lightDir));
+    float diff = std::max(normal.dot(lightDir), 0.0f);
     Cartesian3 diffuse = Cartesian3(diff, diff, diff);
-    diffuse = diffuse *  Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
+    diffuse = Cartesian3(0.5f, 0.5f, 0.5f) * diffuse * Cartesian3(shared_material->diffuse);
 
     // specular lighting
-    Cartesian3 specularAmount = Cartesian3(0.5f, 0.5f, 0.5f);
+    Cartesian3 specularAmount = Cartesian3(1.0f, 1.0f, 1.0f);
     Cartesian3 viewDirection = ray.GetRayOrigin() - vecHitPoint;
     viewDirection = viewDirection.unit();
 
     // reflect about the normal
-    //lightDir = Cartesian3(-lightDir.x, -lightDir.y, -lightDir.z);
+    lightDir = Cartesian3(-lightDir.x, -lightDir.y, -lightDir.z);
     Cartesian3 reflectionDirection = lightDir.reflect(normal);
     float spec_calc = std::pow(std::max(viewDirection.dot(reflectionDirection), 0.0f), 32);
     Cartesian3 spec = {spec_calc, spec_calc, spec_calc};
@@ -228,7 +193,6 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     }
 
     auto c = (ambient + diffuse + specular) *  Cartesian3(shared_material->diffuse);
-
 
     return {c.x, c.y, c.z, 1.0};
 }

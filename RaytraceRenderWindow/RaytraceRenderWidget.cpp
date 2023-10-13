@@ -200,10 +200,6 @@ void RaytraceRenderWidget::RaytraceThread()
             Homogeneous4 color = {0.f, 0.0f, 0.0f , 0.0f};
             auto r = ray.GetRayOrigin() + ray.GetRayDirecion() * collision.t;
 
-            // horrible way to do it:
-                // check if param is on
-                // use tri to obtain normals and then calc interp normals using
-                // baricentric function which returns alpha,beta,gamma
             auto c = collision.tri.baricentric(r);
             Homogeneous4 output_normals = Homogeneous4(0.0f, 0.0f, 0.0f, 1.0);
 
@@ -227,8 +223,9 @@ void RaytraceRenderWidget::RaytraceThread()
                     color = {interpNormal.x, interpNormal.y, interpNormal.z, 1.0f};
                 } else
                 {
+                    // Lighting
                     auto finalColour = Homogeneous4(0.0f, 0.0f, 0.0f, 0.0f);
-                    float bias = 0.0001f;
+                    float bias = 0.001;
                     for(unsigned int i = 0; i < renderParameters->lights.size(); i++)
                     {
                         Cartesian3 lightPos = {
@@ -240,13 +237,15 @@ void RaytraceRenderWidget::RaytraceThread()
                         float shadowRayDistance = (lightPos - r).length();
                         lightDirection = lightDirection.unit();
 
-                        Ray shadowRay(r + Cartesian3(output_normals.x, output_normals.y, output_normals.z) * bias, lightDirection);
+                        // Shadows
+                        auto displacedRay = r + Cartesian3(output_normals.x, output_normals.y, output_normals.z) * bias;
+                        Ray shadowRay(displacedRay, lightDirection);
                         bool inShadow = false;
                         auto shadowcollide = scene->ClosestTriangle(shadowRay);
-                        if(shadowcollide.t < shadowRayDistance && shadowcollide.t  > bias)
+                        if(shadowcollide.t < shadowRayDistance && shadowcollide.t > bias)
                             inShadow = true;
-                        color = color + collision.tri.PhongShading(renderParameters->lights[i]->GetPositionCenter(),
-                                                                  renderParameters->lights[i]->GetColor(), ray, {c.x, c.y, c.z}, false);
+                        color = color + collision.tri.PhongShading(lightPos,
+                                                                   renderParameters->lights[i]->GetColor(), ray, {c.x, c.y, c.z}, inShadow);
                     }
                 }
             } else
@@ -264,7 +263,7 @@ void RaytraceRenderWidget::RaytraceThread()
             frameBuffer[j][i].alpha = 255;
         }
 
-        std::cout << "Done" << std::endl;
+        //std::cout << "Done" << std::endl;
     }
 }
 
