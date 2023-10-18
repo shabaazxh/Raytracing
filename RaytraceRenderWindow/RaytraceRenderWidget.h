@@ -35,6 +35,8 @@
 #include "scene.h"
 #include "ray.h"
 
+#define MAX_BOUNCES 2
+
 // class for a render widget with arcball linked to an external arcball widget
 class RaytraceRenderWidget : public QOpenGLWidget										
 	{ // class RaytraceRenderWidget
@@ -72,6 +74,8 @@ class RaytraceRenderWidget : public QOpenGLWidget
     void ForceRepaint();
 
     Ray calculateRay(int pixelx, int pixely, bool perspective);
+
+    Homogeneous4 TraceAndShadeWithRay(Ray& ray, int bounces, float value);
 			
 	protected:
 	// called when OpenGL context is set up
@@ -101,6 +105,8 @@ class RaytraceRenderWidget : public QOpenGLWidget
 	// note that Continue & End assume the button has already been set
 	void ContinueScaledDrag(float x, float y);
 	void EndScaledDrag(float x, float y);
+
+
 
 
 

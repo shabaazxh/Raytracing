@@ -54,6 +54,11 @@ Cartesian3 Cartesian3::operator *(float factor) const
     return returnVal;
     } // Cartesian3::operator *()
 
+Cartesian3 Cartesian3::operator *=(float factor)
+{
+    return Cartesian3(x *= factor, y *= factor, z *= factor);
+}
+
 // my own overload of the * operator ======================
 Cartesian3 Cartesian3::operator*(const Cartesian3& other) const
 {

@@ -546,6 +546,9 @@ debug/moc_RaytraceRenderWidget.cpp: ../RaytraceRenderWindow/RaytraceRenderWidget
 		../RaytraceRenderWindow/Quaternion.h \
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h \
 		debug/moc_predefs.h \
 		C:/Qt/6.5.3/mingw_64/bin/moc.exe
 	C:\Qt\6.5.3\mingw_64\bin\moc.exe $(DEFINES) --include C:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/build-RaytraceRenderWindow-Desktop_Qt_6_5_3_MinGW_64_bit-Debug/debug/moc_predefs.h -IC:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -IC:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/RaytraceRenderWindow -IC:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/RaytraceRenderWindow -IC:/Qt/6.5.3/mingw_64/include -IC:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.5.3/mingw_64/include/QtOpenGL -IC:/Qt/6.5.3/mingw_64/include/QtWidgets -IC:/Qt/6.5.3/mingw_64/include/QtGui -IC:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\RaytraceRenderWindow\RaytraceRenderWidget.h -o debug\moc_RaytraceRenderWidget.cpp
@@ -1089,6 +1092,9 @@ debug/moc_RenderController.cpp: ../RaytraceRenderWindow/RenderController.h \
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/RaytraceRenderWidget.h \
 		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h \
 		debug/moc_predefs.h \
 		C:/Qt/6.5.3/mingw_64/bin/moc.exe
 	C:\Qt\6.5.3\mingw_64\bin\moc.exe $(DEFINES) --include C:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/build-RaytraceRenderWindow-Desktop_Qt_6_5_3_MinGW_64_bit-Debug/debug/moc_predefs.h -IC:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -IC:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/RaytraceRenderWindow -IC:/Users/Shahb/Desktop/work/fmr/Raytracing_Empty/RaytraceRenderWindow -IC:/Qt/6.5.3/mingw_64/include -IC:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.5.3/mingw_64/include/QtOpenGL -IC:/Qt/6.5.3/mingw_64/include/QtWidgets -IC:/Qt/6.5.3/mingw_64/include/QtGui -IC:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\RaytraceRenderWindow\RenderController.h -o debug\moc_RenderController.cpp
@@ -2061,6 +2067,9 @@ debug/main.o: ../RaytraceRenderWindow/main.cpp C:/Qt/6.5.3/mingw_64/include/QtWi
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/RaytraceRenderWidget.h \
 		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h \
 		../RaytraceRenderWindow/RenderController.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\RaytraceRenderWindow\main.cpp
 
@@ -2257,7 +2266,10 @@ debug/RaytraceRenderWidget.o: ../RaytraceRenderWindow/RaytraceRenderWidget.cpp C
 		../RaytraceRenderWindow/Homogeneous4.h \
 		../RaytraceRenderWindow/Quaternion.h \
 		../RaytraceRenderWindow/Light.h \
-		../RaytraceRenderWindow/camera.h
+		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\RaytraceRenderWidget.o ..\RaytraceRenderWindow\RaytraceRenderWidget.cpp
 
 debug/RenderController.o: ../RaytraceRenderWindow/RenderController.cpp ../RaytraceRenderWindow/RenderController.h \
@@ -2798,7 +2810,10 @@ debug/RenderController.o: ../RaytraceRenderWindow/RenderController.cpp ../Raytra
 		../RaytraceRenderWindow/RenderParameters.h \
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/RaytraceRenderWidget.h \
-		../RaytraceRenderWindow/camera.h
+		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\RenderController.o ..\RaytraceRenderWindow\RenderController.cpp
 
 debug/RenderWidget.o: ../RaytraceRenderWindow/RenderWidget.cpp ../RaytraceRenderWindow/RenderWidget.h \
@@ -3518,7 +3533,10 @@ debug/RenderWindow.o: ../RaytraceRenderWindow/RenderWindow.cpp ../RaytraceRender
 		../RaytraceRenderWindow/RenderParameters.h \
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/RaytraceRenderWidget.h \
-		../RaytraceRenderWindow/camera.h
+		../RaytraceRenderWindow/camera.h \
+		../RaytraceRenderWindow/scene.h \
+		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\RenderWindow.o ..\RaytraceRenderWindow\RenderWindow.cpp
 
 debug/RGBAImage.o: ../RaytraceRenderWindow/RGBAImage.cpp ../RaytraceRenderWindow/RGBAImage.h \
@@ -3544,6 +3562,7 @@ debug/scene.o: ../RaytraceRenderWindow/scene.cpp ../RaytraceRenderWindow/scene.h
 		../RaytraceRenderWindow/Quaternion.h \
 		../RaytraceRenderWindow/Light.h \
 		../RaytraceRenderWindow/triangle.h \
+		../RaytraceRenderWindow/ray.h \
 		../RaytraceRenderWindow/camera.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\scene.o ..\RaytraceRenderWindow\scene.cpp
 
@@ -3552,7 +3571,8 @@ debug/triangle.o: ../RaytraceRenderWindow/triangle.cpp ../RaytraceRenderWindow/t
 		../RaytraceRenderWindow/Cartesian3.h \
 		../RaytraceRenderWindow/Material.h \
 		../RaytraceRenderWindow/RGBAImage.h \
-		../RaytraceRenderWindow/RGBAValue.h
+		../RaytraceRenderWindow/RGBAValue.h \
+		../RaytraceRenderWindow/ray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\triangle.o ..\RaytraceRenderWindow\triangle.cpp
 
 debug/moc_ArcBallWidget.o: debug/moc_ArcBallWidget.cpp 

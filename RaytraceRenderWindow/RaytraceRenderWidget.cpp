@@ -136,6 +136,95 @@ void RaytraceRenderWidget::paintGL()
     } // RaytraceRenderWidget::paintGL()
 
 
+#include <random>
+    // Function to generate a random double between 0.0 and 1.0
+    double random_double() {
+    static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    static std::mt19937 generator;
+    return distribution(generator);
+    }
+
+    // Function for cosine sampling a hemisphere
+    Cartesian3 cosine_sample_hemisphere() {
+    double xi1 = random_double();
+    double xi2 = random_double();
+
+    double theta = acos(sqrt(1.0 - xi1));
+    double phi = 2.0 * M_PI * xi2;
+
+    double xs = sin(theta) * cos(phi);
+    double ys = sin(theta) * sin(phi);
+    double zs = cos(theta);
+
+    return Cartesian3(xs, ys, zs);
+    }
+
+Homogeneous4 RaytraceRenderWidget::TraceAndShadeWithRay(Ray& ray, int bounces, float value)
+{
+    Homogeneous4 color = {0.f, 0.0f, 0.0f , 0.0f};
+
+    auto collision = scene->ClosestTriangle(ray);
+
+    if(collision.t == std::numeric_limits<float>::max())
+    {
+        float t = 0.5f * (ray.GetRayDirecion().y + 1.0f); // norm to 0-1
+        return (1.0f - t) * Homogeneous4(0.5f, 0.7f, 1.0f) + t * Homogeneous4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    // hit position
+    auto hit_pos = ray.GetRayOrigin() + ray.GetRayDirecion() * collision.t;
+    auto baricentric = collision.tri.baricentric(hit_pos);
+
+    // Calculate normals
+    Cartesian3 normalA = Cartesian3(collision.tri.normals[0].x, collision.tri.normals[0].y, collision.tri.normals[0].z);
+    Cartesian3 normalB = Cartesian3(collision.tri.normals[1].x, collision.tri.normals[1].y, collision.tri.normals[1].z);
+    Cartesian3 normalC = Cartesian3(collision.tri.normals[2].x, collision.tri.normals[2].y, collision.tri.normals[2].z);
+    Cartesian3 interpNormal = baricentric.x * normalA + baricentric.y * normalB + baricentric.z * normalC;
+    interpNormal = interpNormal.unit();
+
+
+    float bias = 0.001;
+    for(unsigned int i = 0; i < renderParameters->lights.size(); i++)
+    {
+        Cartesian3 lightPos = {
+                               renderParameters->lights[i]->GetPositionCenter().x,
+                               renderParameters->lights[i]->GetPositionCenter().y,
+                               renderParameters->lights[i]->GetPositionCenter().z};
+
+        Cartesian3 lightDirection = lightPos - hit_pos;
+        float shadowRayDistance = (lightPos - hit_pos).length();
+        lightDirection = lightDirection.unit();
+
+        // Shadows
+        auto displacedRay = hit_pos + Cartesian3(interpNormal.x, interpNormal.y, interpNormal.z) * bias;
+        Ray shadowRay(displacedRay, lightDirection);
+        bool inShadow = false;
+        auto shadowcollide = scene->ClosestTriangle(shadowRay);
+        if(shadowcollide.t < shadowRayDistance - 2 * bias)
+            inShadow = true;
+        color = color + collision.tri.PhongShading(lightPos,
+                                                   renderParameters->lights[i]->GetColor(), ray, {baricentric.x, baricentric.y, baricentric.z}, inShadow);
+    }
+
+    if(bounces >= MAX_BOUNCES)
+    {
+        return color;
+    }
+
+    // do reflections
+    Cartesian3 reflectionDirection = ray.GetRayDirecion().reflect(interpNormal);
+    Ray reflectionRay(hit_pos  + bias * reflectionDirection, reflectionDirection);
+    Homogeneous4 reflectedColor = TraceAndShadeWithRay(reflectionRay, bounces + 1, 1.0f);
+
+
+    float reflectivity = collision.tri.shared_material->reflectivity;
+
+    // linear interpolate between scene colour and reflective
+    color = (1 - reflectivity) * color + Cartesian3(reflectivity,reflectivity,reflectivity) * Cartesian3(reflectedColor.x, reflectedColor.y, reflectedColor.z);
+
+    return color;
+}
+
 
 Ray RaytraceRenderWidget::calculateRay(int pixelx, int pixely, bool perspective)
 {
@@ -194,66 +283,8 @@ void RaytraceRenderWidget::RaytraceThread()
         for(int i = 0; i < frameBuffer.width; i++){
 
             auto ray = calculateRay(i, j, false);
+            auto color = TraceAndShadeWithRay(ray, 0, 1.0f);
 
-            auto collision = scene->ClosestTriangle(ray);
-
-            Homogeneous4 color = {0.f, 0.0f, 0.0f , 0.0f};
-            auto r = ray.GetRayOrigin() + ray.GetRayDirecion() * collision.t;
-
-            auto c = collision.tri.baricentric(r);
-            Homogeneous4 output_normals = Homogeneous4(0.0f, 0.0f, 0.0f, 1.0);
-
-            if(collision.t != std::numeric_limits<float>::max())
-            {
-                if(renderParameters->interpolationRendering)
-                {
-
-                    auto baricentric = collision.tri.baricentric(r);
-
-                    Cartesian3 normalA = Cartesian3(collision.tri.normals[0].x, collision.tri.normals[0].y, collision.tri.normals[0].z);
-                    Cartesian3 normalB = Cartesian3(collision.tri.normals[1].x, collision.tri.normals[1].y, collision.tri.normals[1].z);
-                    Cartesian3 normalC = Cartesian3(collision.tri.normals[2].x, collision.tri.normals[2].y, collision.tri.normals[2].z);
-
-                    // interp normal
-                    Cartesian3 interpNormal = baricentric.x * normalA + baricentric.y * normalB + baricentric.z * normalC;
-                    output_normals = interpNormal;
-                    interpNormal = interpNormal.unit();
-
-                    interpNormal = 0.5 * interpNormal + 0.5f;
-                    color = {interpNormal.x, interpNormal.y, interpNormal.z, 1.0f};
-                } else
-                {
-                    // Lighting
-                    auto finalColour = Homogeneous4(0.0f, 0.0f, 0.0f, 0.0f);
-                    float bias = 0.001;
-                    for(unsigned int i = 0; i < renderParameters->lights.size(); i++)
-                    {
-                        Cartesian3 lightPos = {
-                        renderParameters->lights[i]->GetPositionCenter().x,
-                        renderParameters->lights[i]->GetPositionCenter().y,
-                        renderParameters->lights[i]->GetPositionCenter().z};
-
-                        Cartesian3 lightDirection = lightPos - r;
-                        float shadowRayDistance = (lightPos - r).length();
-                        lightDirection = lightDirection.unit();
-
-                        // Shadows
-                        auto displacedRay = r + Cartesian3(output_normals.x, output_normals.y, output_normals.z) * bias;
-                        Ray shadowRay(displacedRay, lightDirection);
-                        bool inShadow = false;
-                        auto shadowcollide = scene->ClosestTriangle(shadowRay);
-                        if(shadowcollide.t < shadowRayDistance && shadowcollide.t > bias)
-                            inShadow = true;
-                        color = color + collision.tri.PhongShading(lightPos,
-                                                                   renderParameters->lights[i]->GetColor(), ray, {c.x, c.y, c.z}, inShadow);
-                    }
-                }
-            } else
-            {
-                //color = {0.0f, 0.5, 0.5, 1.0};
-                float t = 0.5f * (ray.GetRayDirecion().y + 1.0f); // norm to 0-1
-                color = (1.0f - t) * Homogeneous4(0.5f, 0.7f, 1.0f) + t * Homogeneous4(1.0f, 1.0f, 1.0f, 1.0f);
-            }
             // multiply by 255 to convert from 0-1 to 0-255 (8-bit form)
             frameBuffer[j][i] = RGBAValue(
                 color.x*255.0f + 0.5,

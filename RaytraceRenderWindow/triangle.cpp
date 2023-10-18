@@ -154,20 +154,19 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
 
 
     // To calculate diffuse, we need lightdir from light to hitpoint
-    // negate lightdir because we need a direction vector from light to point
     auto point_to_light = lightpos - hitpoint;
     Cartesian3 lightDir = Cartesian3(point_to_light.x, point_to_light.y, point_to_light.z);
     lightDir = lightDir.unit();
     //lightDir = {-lightDir.x, -lightDir.y, -lightDir.z};
 
     // Ambient lighting
-    Cartesian3 ambient = 0.8f * Cartesian3(shared_material->diffuse);
+    Cartesian3 ambient = 0.8f * Cartesian3(shared_material->ambient);
 
 //    Cartesian3 testDirection = Cartesian3(-1, -1, -1);
 //    testDirection = testDirection.unit();
 //    testDirection = {-testDirection.x, -testDirection.y, -testDirection.z};
 
-    // Diffuse lightingb
+    // Diffuse lighting
     float diff = std::max(normal.dot(lightDir), 0.0f);
     Cartesian3 diffuse = Cartesian3(diff, diff, diff);
     diffuse = Cartesian3(0.5f, 0.5f, 0.5f) * diffuse * Cartesian3(shared_material->diffuse);
@@ -191,6 +190,26 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
         diffuse = Cartesian3(0.0f, 0.0f, 0.0f);
         specular = Cartesian3(0.0f, 0.0f, 0.0f);
     }
+
+
+    // atten formula: 1.0f / c  + l * d + q * d^2
+    // quadratic atten formula = 1.0 / distance^2
+    // creates a fall off for the light as the distance between point and light increases
+    // https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff#:~:text=Quadratic%20Attenuation,-This%20is%20a&text=Mathematically%2C%20the%20attenuation%20of%20a,very%20sharp%20drop%20in%20light.
+    float constant = 1.0f;
+    float linear = 0.09f;
+    float quadratic = 0.032f;
+
+    float distance =
+        (Cartesian3(lightpos.x, lightpos.y, lightpos.z) -
+                     Cartesian3(hitpoint.x, hitpoint.y, hitpoint.z)).length();
+    //float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+    float attenuation = 1.0f / (distance * distance);
+
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular*= attenuation;
+
 
     auto c = (ambient + diffuse + specular) *  Cartesian3(shared_material->diffuse);
 

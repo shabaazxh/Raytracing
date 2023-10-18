@@ -46,6 +46,7 @@ public:
     Material(Cartesian3 ambient,Cartesian3 diffuse,Cartesian3 specular,Cartesian3 emissive,float shininess); //no texture in constructor;
     ~Material();
     static std::vector<Material*> readMaterials(std::istream &materialStream);
+    bool mirror = true;
 };
 
 #endif // MATERIAL_H

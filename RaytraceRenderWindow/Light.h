@@ -44,6 +44,7 @@ public:
     Homogeneous4 SetPosition(const Homogeneous4& position) { lightPosition = position; }
 
     bool enabled;
+    float intensity;
 
     inline Homogeneous4 GetColor(){return lightColor;}
 
