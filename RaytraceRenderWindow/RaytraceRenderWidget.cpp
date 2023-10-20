@@ -182,7 +182,6 @@ Homogeneous4 RaytraceRenderWidget::TraceAndShadeWithRay(Ray& ray, int bounces, f
     Cartesian3 interpNormal = baricentric.x * normalA + baricentric.y * normalB + baricentric.z * normalC;
     interpNormal = interpNormal.unit();
 
-
     float bias = 0.001;
     for(unsigned int i = 0; i < renderParameters->lights.size(); i++)
     {
@@ -199,9 +198,9 @@ Homogeneous4 RaytraceRenderWidget::TraceAndShadeWithRay(Ray& ray, int bounces, f
         auto displacedRay = hit_pos + Cartesian3(interpNormal.x, interpNormal.y, interpNormal.z) * bias;
         Ray shadowRay(displacedRay, lightDirection);
         bool inShadow = false;
-        auto shadowcollide = scene->ClosestTriangle(shadowRay);
-        if(shadowcollide.t < shadowRayDistance - 2 * bias)
-            inShadow = true;
+//        auto shadowcollide = scene->ClosestTriangle(shadowRay);
+//        if(shadowcollide.t < shadowRayDistance - 2 * bias)
+//            inShadow = true;
         color = color + collision.tri.PhongShading(lightPos,
                                                    renderParameters->lights[i]->GetColor(), ray, {baricentric.x, baricentric.y, baricentric.z}, inShadow);
     }
@@ -214,13 +213,13 @@ Homogeneous4 RaytraceRenderWidget::TraceAndShadeWithRay(Ray& ray, int bounces, f
     // do reflections
     Cartesian3 reflectionDirection = ray.GetRayDirecion().reflect(interpNormal);
     Ray reflectionRay(hit_pos  + bias * reflectionDirection, reflectionDirection);
-    Homogeneous4 reflectedColor = TraceAndShadeWithRay(reflectionRay, bounces + 1, 1.0f);
+   // Homogeneous4 reflectedColor = TraceAndShadeWithRay(reflectionRay, bounces + 1, 1.0f);
 
 
     float reflectivity = collision.tri.shared_material->reflectivity;
 
     // linear interpolate between scene colour and reflective
-    color = (1 - reflectivity) * color + Cartesian3(reflectivity,reflectivity,reflectivity) * Cartesian3(reflectedColor.x, reflectedColor.y, reflectedColor.z);
+    //color = (1 - reflectivity) * color + Cartesian3(reflectivity,reflectivity,reflectivity) * Cartesian3(reflectedColor.x, reflectedColor.y, reflectedColor.z);
 
     return color;
 }

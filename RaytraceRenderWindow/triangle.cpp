@@ -9,6 +9,7 @@ Triangle::Triangle()
 // Implementation based on learnings from:
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html#:~:text=Barycentric%20coordinates%20are%20also%20known,A%2C%20B%2C%20C).
 // https://www.youtube.com/watch?v=ZVgf_W-X8eM&t=291s
+// scratchapixel (2022)
 Cartesian3 Triangle::baricentric(Cartesian3 intersection_point)
 {
 
@@ -157,14 +158,9 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     auto point_to_light = lightpos - hitpoint;
     Cartesian3 lightDir = Cartesian3(point_to_light.x, point_to_light.y, point_to_light.z);
     lightDir = lightDir.unit();
-    //lightDir = {-lightDir.x, -lightDir.y, -lightDir.z};
 
     // Ambient lighting
-    Cartesian3 ambient = 0.8f * Cartesian3(shared_material->ambient);
-
-//    Cartesian3 testDirection = Cartesian3(-1, -1, -1);
-//    testDirection = testDirection.unit();
-//    testDirection = {-testDirection.x, -testDirection.y, -testDirection.z};
+    Cartesian3 ambient = 0.2 * shared_material->ambient;
 
     // Diffuse lighting
     float diff = std::max(normal.dot(lightDir), 0.0f);
@@ -179,9 +175,12 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     // reflect about the normal
     lightDir = Cartesian3(-lightDir.x, -lightDir.y, -lightDir.z);
     Cartesian3 reflectionDirection = lightDir.reflect(normal);
-    float spec_calc = std::pow(std::max(viewDirection.dot(reflectionDirection), 0.0f), 32);
+    reflectionDirection = reflectionDirection.unit();
+    float spec_calc = std::pow(std::max(viewDirection.dot(reflectionDirection), 0.0f), shared_material->shininess);
+
+    if(shared_material->shininess > 0) { std::cout << "greater than 0 found: " << std::endl; }
     Cartesian3 spec = {spec_calc, spec_calc, spec_calc};
-    Cartesian3 specular = specularAmount * spec * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
+    Cartesian3 specular = shared_material->specular * spec * Cartesian3(lightcolour.x, lightcolour.y, lightcolour.z);
 
     if(inShadow)
     {
@@ -211,7 +210,7 @@ Homogeneous4 Triangle::PhongShading(const Homogeneous4& lightpos, const Homogene
     specular*= attenuation;
 
 
-    auto c = (ambient + diffuse + specular) *  Cartesian3(shared_material->diffuse);
+    auto c = (ambient + diffuse + specular);
 
     return {c.x, c.y, c.z, 1.0};
 }

@@ -38,29 +38,28 @@ void RenderParameters::findLights(std::vector<ThreeDModel> objects)
                             found = true;
                             break;
                         }
+                    }
 
-                        // if a vertex is found which is not shared
-                        // index i would be the current found vertex
-                        if(!found)
-                        {
-                            unsigned int id1 = obj.faceVertices[0][i];
-                            unsigned int id2 = obj.faceVertices[0][(i+1)%3];
-                            unsigned int id3 = obj.faceVertices[0][(i+2)%3];
-                            Cartesian3 v1 = obj.vertices[id1];
-                            Cartesian3 v2 = obj.vertices[id2];
-                            Cartesian3 v3 = obj.vertices[id3];
-                            Cartesian3 vecA = v2 - v1;
-                            Cartesian3 vecB = v3 - v1;
-                            Homogeneous4 color = obj.material->emissive;
-                            Homogeneous4 pos = v1 + (vecA/2) + (vecB/2); // set position to be center of triangle?
-                            Homogeneous4 normal = obj.normals[obj.faceNormals[0][0]];
-                            Light* l = new Light(Light::Area, color, pos, normal, vecA, vecB);
-                            l->enabled = true;
-                            lights.push_back(l);
-                        }
+                    // if a vertex is found which is not shared
+                    // index i would be the current found vertex
+                    if(!found)
+                    {
+                        unsigned int id1 = obj.faceVertices[0][i];
+                        unsigned int id2 = obj.faceVertices[0][(i+1)%3];
+                        unsigned int id3 = obj.faceVertices[0][(i+2)%3];
+                        Cartesian3 v1 = obj.vertices[id1];
+                        Cartesian3 v2 = obj.vertices[id2];
+                        Cartesian3 v3 = obj.vertices[id3];
+                        Cartesian3 vecA = v2 - v1;
+                        Cartesian3 vecB = v3 - v1;
+                        Homogeneous4 color = obj.material->emissive;
+                        Homogeneous4 pos = v1 + (vecA/2) + (vecB/2); // set position to be center of triangle?
+                        Homogeneous4 normal = obj.normals[obj.faceNormals[0][0]];
+                        Light* l = new Light(Light::Area, color, pos, normal, vecA, vecB);
+                        l->enabled = true;
+                        lights.push_back(l);
                     }
                 }
-
             }
             else
             {
